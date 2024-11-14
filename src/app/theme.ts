@@ -62,6 +62,7 @@ const PangeaDark = () => {
       borderRadius: 10,
     },
     components: {
+      // biome-ignore lint/style/useNamingConvention: matches component name
       MuiButtonBase: {
         defaultProps: {
           disableRipple: true,
@@ -74,6 +75,7 @@ const PangeaDark = () => {
           },
         },
       },
+      // biome-ignore lint/style/useNamingConvention: matches component name
       MuiTabs: {
         styleOverrides: {
           root: {
@@ -83,6 +85,7 @@ const PangeaDark = () => {
           },
         },
       },
+      // biome-ignore lint/style/useNamingConvention: matches component name
       MuiButton: {
         styleOverrides: {
           root: {
@@ -120,6 +123,7 @@ const PangeaDark = () => {
           },
         },
       },
+      // biome-ignore lint/style/useNamingConvention: matches component name
       MuiInputBase: {
         styleOverrides: {
           root: {
@@ -133,7 +137,7 @@ const PangeaDark = () => {
           },
         },
       },
-
+      // biome-ignore lint/style/useNamingConvention: matches component name
       MuiSwitch: {
         styleOverrides: {
           root: {
@@ -164,6 +168,7 @@ const PangeaDark = () => {
           },
         },
       },
+      // biome-ignore lint/style/useNamingConvention: matches component name
       MuiSvgIcon: {
         styleOverrides: {
           root: {
@@ -176,22 +181,6 @@ const PangeaDark = () => {
                 },
               },
             ],
-          },
-        },
-      },
-      // styles for Audit Log Viewer
-      MuiGrid: {
-        styleOverrides: {
-          root: {
-            ".MuiDataGrid-columnHeaderTitle": {
-              fontFamily: "Inter",
-            },
-            ".MuiDataGrid-row .MuiDataGrid-cell": {
-              borderBottom: `1px solid ${Colors.borders}`,
-            },
-            ".MuiButtonGroup-groupedOutlined.MuiButtonGroup-lastButton": {
-              borderColor: Colors.text.secondary,
-            },
           },
         },
       },

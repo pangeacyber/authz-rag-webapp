@@ -1,15 +1,14 @@
 import { Box, Button, Drawer, Modal, Stack, Typography } from "@mui/material";
-import { styled, useTheme } from "@mui/material/styles";
+import { styled } from "@mui/material/styles";
 
 import { useAuth } from "@pangeacyber/react-auth";
 
-import { Colors } from "@app/theme";
-import SideBar from "@app/components/SideBar";
-import AuditViewer from "../AuditViewer";
-import SidePanel from "../SidePanel";
+import PangeaLogo from "@/app/components/Logo";
+import SideBar from "@/app/components/SideBar";
+import { useChatContext } from "@/app/context";
+import { Colors } from "@/app/theme";
 import ChatWindow from "../ChatWindow";
-import { useChatContext } from "@app/context";
-import PangeaLogo from "@src/app/components/Logo";
+import SidePanel from "../SidePanel";
 
 const panelOpenWidth = 330;
 
@@ -74,9 +73,6 @@ const Layout = () => {
         </Drawer>
         <Main open={sidePanelOpen}>
           <ChatWindow />
-          <Stack alignItems="center">
-            <AuditViewer />
-          </Stack>
         </Main>
       </Box>
       <Modal open={loginOpen} onClose={handleLoginClose}>

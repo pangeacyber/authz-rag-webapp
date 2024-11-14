@@ -1,4 +1,4 @@
-import { ChangeEvent, KeyboardEvent, useEffect, useState } from "react";
+import SendIcon from "@mui/icons-material/Send";
 import {
   Alert,
   Box,
@@ -12,22 +12,19 @@ import {
   Typography,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import SendIcon from "@mui/icons-material/Send";
 import { useAuth } from "@pangeacyber/react-auth";
+import { type ChangeEvent, type KeyboardEvent, useState } from "react";
 
-import { DAILY_MAX_MESSAGES, PROMPT_MAX_CHARS } from "@src/const";
-import { useChatContext, ChatMessage } from "@src/app/context";
+import { type ChatMessage, useChatContext } from "@/app/context";
+import { Colors } from "@/app/theme";
+
+import ChatScroller from "./components/ChatScroller";
 import {
-  auditSearch,
-  auditUserPrompt,
   callInputDataGuard,
-  callResponseDataGuard,
   callPromptGuard,
+  callResponseDataGuard,
   sendUserMessage,
 } from "./utils";
-import ChatScroller from "./components/ChatScroller";
-import { Colors } from "@src/app/theme";
-import { rateLimitQuery } from "@src/utils";
 
 function hashCode(str: string) {
   let hash = 0;
@@ -42,18 +39,15 @@ const ChatWindow = () => {
   const theme = useTheme();
   const {
     loading,
+    authzEnabled,
     promptGuardEnabled,
     dataGuardEnabled,
-    systemPrompt,
     userPrompt,
     setUserPrompt,
-    setLoading,
     setLoginOpen,
   } = useChatContext();
   const { authenticated, user } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [remaining, setRemaining] = useState(DAILY_MAX_MESSAGES);
-  const [overlimit, setOverLimit] = useState(false);
   const [processing, setProcessing] = useState("");
   const [error, setError] = useState("");
   const [open, setOpen] = useState(false);
@@ -72,43 +66,17 @@ const ChatWindow = () => {
     }
 
     // don't accept empty prompts
-    if (!userPrompt || loading || !!processing || overlimit || remaining <= 0) {
+    if (!userPrompt || loading || !!processing) {
       return;
     }
 
     const token = user?.active_token?.token || "";
 
-    setProcessing("Logging user prompt");
-
-    const logEvent = {
-      event: {
-        event_type: "user_prompt",
-        event_input: userPrompt,
-        event_context: JSON.stringify({
-          system_prompt: systemPrompt,
-        }),
-      },
-    };
-
-    try {
-      const logResp = await auditUserPrompt(token, logEvent);
-      const promptMsg: ChatMessage = {
-        hash: logResp.hash,
-        type: "user_prompt",
-        input: userPrompt,
-      };
-      setMessages((prevMessages) => [...prevMessages, promptMsg]);
-      setUserPrompt("");
-    } catch (err) {
-      processingError("User prompt logging failed, please try again");
-      return;
-    }
-
     if (promptGuardEnabled) {
       setProcessing("Checking user prompt with Prompt Guard");
 
       try {
-        const promptResp = await callPromptGuard(token, userPrompt, "");
+        const promptResp = await callPromptGuard(token, userPrompt);
         const pgMsg: ChatMessage = {
           hash: hashCode(JSON.stringify(promptResp)),
           type: "prompt_guard",
@@ -121,7 +89,7 @@ const ChatWindow = () => {
           processingError("Processing halted: suspicious prompt");
           return;
         }
-      } catch (err) {
+      } catch (_) {
         processingError("Prompt Guard call failed, please try again");
         return;
       }
@@ -142,7 +110,7 @@ const ChatWindow = () => {
         setMessages((prevMessages) => [...prevMessages, dgiMsg]);
 
         llmUserPrompt = dataResp.redacted_prompt;
-      } catch (err) {
+      } catch (_) {
         processingError("AI Guard call failed, please try again");
         return;
       }
@@ -160,11 +128,8 @@ const ChatWindow = () => {
     let llmResponse = "";
 
     try {
-      llmResponse = await sendUserMessage(token, llmUserPrompt, systemPrompt);
-
-      // decrement daily remaining count
-      setRemaining((curVal) => curVal - 1);
-    } catch (err) {
+      llmResponse = await sendUserMessage(token, llmUserPrompt, authzEnabled);
+    } catch (_) {
       processingError("LLM call failed, please try again");
       return;
     }
@@ -182,7 +147,7 @@ const ChatWindow = () => {
         dataGuardMessages.push(dgrMsg);
 
         llmResponse = dataResp.redacted_prompt;
-      } catch (err) {
+      } catch (_) {
         processingError("AI Guard call failed, please try again");
       }
     }
@@ -215,66 +180,6 @@ const ChatWindow = () => {
   const handleClose = () => {
     setOpen(false);
   };
-
-  useEffect(() => {
-    setOverLimit(userPrompt.length + systemPrompt.length > PROMPT_MAX_CHARS);
-  }, [userPrompt, systemPrompt]);
-
-  useEffect(() => {
-    if (!authenticated) {
-      setError("");
-    } else if (remaining <= 0) {
-      setError("Your daily quota has been exceeded");
-      setOpen(true);
-    } else if (overlimit) {
-      setError("Your prompt exceeds the maximum limit");
-      setOpen(true);
-    } else {
-      setError("");
-      setOpen(false);
-    }
-  }, [authenticated, remaining, overlimit]);
-
-  useEffect(() => {
-    const loadSearchData = async () => {
-      const token = user?.active_token?.token || "";
-      if (token) {
-        setLoading(true);
-
-        // Get LLM responses for the last 24-hours
-        const limitSearch = rateLimitQuery();
-        limitSearch.search_restriction = { actor: [user?.username] };
-        const searchResp = await auditSearch(token, limitSearch);
-        const count = searchResp?.count || 0;
-        setRemaining(DAILY_MAX_MESSAGES - count);
-
-        // Load Chat history from audit log
-        const response = await auditSearch(token, { limit: 50 });
-
-        const messages_: ChatMessage[] = response.events.map((event: any) => {
-          const message: ChatMessage = {
-            hash: event.hash,
-            type: event.envelope.event.event_type,
-            context: event.envelope.event.event_context,
-            input: event.envelope.event.event_input,
-            output: event.envelope.event.event_output,
-            findings: event.envelope.event.event_findings,
-            malicious_count: event.envelope.event.malicious_entity_count,
-          };
-          return message;
-        });
-
-        setMessages(messages_.reverse());
-        setLoading(false);
-      }
-    };
-
-    if (authenticated && !loading && !processing) {
-      loadSearchData();
-    } else if (!authenticated && !loading) {
-      setMessages([]);
-    }
-  }, [authenticated]);
 
   return (
     <Stack width="100%" height="100%">
@@ -329,12 +234,12 @@ const ChatWindow = () => {
               </Box>
               <InputBase
                 value={userPrompt}
-                placeholder="What’s the weather today?"
+                placeholder="How much PTO does Alice have?"
                 size="small"
                 multiline
                 maxRows={4}
                 sx={{ width: "calc(100% - 48px)" }}
-                disabled={loading || !!processing}
+                disabled={loading || !!processing || !authenticated}
                 onChange={handleChange}
                 onKeyDown={handleKeyPress}
               />
@@ -342,9 +247,7 @@ const ChatWindow = () => {
                 <span>
                   <IconButton
                     onClick={handleSubmit}
-                    disabled={
-                      loading || !!processing || overlimit || remaining <= 0
-                    }
+                    disabled={loading || !!processing}
                   >
                     <SendIcon />
                   </IconButton>
@@ -373,22 +276,6 @@ const ChatWindow = () => {
                   sx={{ color: Colors.secondary }}
                 />
               </Stack>
-            )}
-          </Stack>
-          <Stack
-            direction="row"
-            alignItems="center"
-            justifyContent="center"
-            mb="12px"
-          >
-            {!loading && authenticated && (
-              <Typography
-                variant="body2"
-                sx={{ fontSize: "12px", lineHeight: "20px", height: "20px" }}
-              >
-                Message count: {remaining} remaining | You can send{" "}
-                {DAILY_MAX_MESSAGES} messages a day
-              </Typography>
             )}
           </Stack>
         </Stack>

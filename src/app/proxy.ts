@@ -1,46 +1,42 @@
-export const dataGuardProxyRequest = async (
+export const dataGuardProxyRequest = (
   token: string,
-  body: any,
-): Promise<Response> => {
+  body: unknown,
+  // biome-ignore lint/style/useNamingConvention: matches API response
+): Promise<{ findings: unknown; redacted_prompt: string }> => {
   return baseProxyRequest(token, "data", "", body);
 };
 
-export const promptGuardProxyRequest = async (
+export const promptGuardProxyRequest = (
   token: string,
-  body: any,
-): Promise<Response> => {
+  body: unknown,
+): Promise<{
+  detected: boolean;
+}> => {
   return baseProxyRequest(token, "prompt", "", body);
 };
 
-export const auditProxyRequest = async (
+export const aiProxyRequest = (
   token: string,
-  action: string,
-  body: any,
-): Promise<Response> => {
-  return baseProxyRequest(token, "audit", action, body);
-};
-
-export const aiProxyRequest = async (
-  token: string,
-  body: any,
-): Promise<Response> => {
+  body: unknown,
+): Promise<string> => {
   return baseProxyRequest(token, "ai", "", body);
 };
 
-const baseProxyRequest = async (
+const baseProxyRequest = async <T = unknown>(
   token: string,
   service: string,
   action: string,
-  body: any,
-): Promise<Response> => {
-  const args = !!action ? `?action=${action}` : "";
+  body: unknown,
+): Promise<T> => {
+  const args = action ? `?action=${action}` : "";
   const resp = await fetch(`/api/${service}${args}`, {
     method: "POST",
     body: JSON.stringify(body),
     cache: "no-cache",
     credentials: "same-origin",
     headers: {
-      Authorization: `Bearer ${token}`,
+      authorization: `Bearer ${token}`,
+      "content-type": "application/json",
     },
   });
 

@@ -1,30 +1,39 @@
-import { Stack } from "@mui/material";
 import {
   LockOutlined,
   MediationOutlined,
   ReviewsOutlined,
 } from "@mui/icons-material";
-import { useAuth } from "@pangeacyber/react-auth";
+import { Stack } from "@mui/material";
 
-import CollapsablePanel from "@app/components/CollapsablePanel";
+import CollapsablePanel from "@/app/components/CollapsablePanel";
+import { useChatContext } from "@/app/context";
+
 import ServiceToggle from "./ServiceToggle";
-import { useChatContext } from "@app/context";
 
 const SecurityControls = () => {
-  const { authenticated } = useAuth();
   const {
     dataGuardEnabled,
     promptGuardEnabled,
-    auditPanelOpen,
+    authzEnabled,
     setDataGuardEnabled,
     setPromptGuardEnabled,
-    setAuditPanelOpen,
-    setLoginOpen,
+    setAuthzEnabled,
   } = useChatContext();
 
   return (
     <CollapsablePanel title="Security">
       <Stack gap={1} py={1}>
+        <ServiceToggle
+          icon={<LockOutlined />}
+          name="AuthZ"
+          link="https://pangea.cloud/docs/api/authz"
+          active={authzEnabled}
+          type="toggle"
+          changeHandler={() => {
+            setAuthzEnabled(!authzEnabled);
+          }}
+        />
+
         <ServiceToggle
           icon={<MediationOutlined />}
           name="Prompt Guard"
@@ -45,24 +54,6 @@ const SecurityControls = () => {
           changeHandler={() => {
             setDataGuardEnabled(!dataGuardEnabled);
           }}
-        />
-
-        <ServiceToggle
-          icon={
-            <LockOutlined color={auditPanelOpen ? "secondary" : "primary"} />
-          }
-          name="Secure Audit Log"
-          link="https://pangea.cloud/docs/api/audit"
-          active={true}
-          type="link"
-          changeHandler={() => {
-            if (!authenticated) {
-              setLoginOpen(true);
-              return;
-            }
-            setAuditPanelOpen(!auditPanelOpen);
-          }}
-          linkLabel={auditPanelOpen ? "Hide" : "View"}
         />
       </Stack>
     </CollapsablePanel>

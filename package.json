@@ -1,32 +1,42 @@
 {
-  "name": "pangea-ai-example",
-  "version": "0.1.0",
+  "name": "@pangeacyber/authz-rag-webapp",
+  "version": "0.0.0-development",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbopack",
     "build": "next build",
+    "prestart": "npm run -s build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "biome check .",
+    "create-authz-tuples": "tsimp scripts/create-authz-tuples.ts"
   },
   "dependencies": {
-    "@aws-sdk/client-bedrock-runtime": "^3.679.0",
-    "@emotion/react": "^11.13.3",
-    "@emotion/styled": "^11.13.0",
-    "@mui/icons-material": "5.16.7",
-    "@mui/material": "5.16.7",
-    "@pangeacyber/react-auth": "^0.0.14",
-    "@pangeacyber/react-mui-audit-log-viewer": "^0.0.95",
-    "next": "14.2.15",
-    "react": "^18",
-    "react-dom": "^18"
+    "@emotion/react": "11.13.3",
+    "@emotion/styled": "11.13.0",
+    "@googleapis/drive": "8.14.0",
+    "@googleapis/sheets": "9.3.1",
+    "@langchain/core": "0.3.18",
+    "@langchain/openai": "0.3.13",
+    "@mui/icons-material": "6.1.7",
+    "@mui/material": "6.1.7",
+    "@pangeacyber/react-auth": "0.0.14",
+    "google-auth-library": "9.14.2",
+    "markdown-table": "3.0.4",
+    "next": "15.0.3",
+    "pangea-node-sdk": "4.1.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
   },
   "devDependencies": {
-    "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "eslint": "^8",
-    "eslint-config-next": "14.2.15",
-    "typescript": "^5"
-  },
-  "packageManager": "yarn@4.5.1"
+    "@biomejs/biome": "1.9.4",
+    "@dotenvx/dotenvx": "1.23.0",
+    "@tsconfig/next": "2.0.3",
+    "@types/node": "22.9.0",
+    "@types/react": "18.3.12",
+    "@types/react-dom": "18.3.1",
+    "tsimp": "2.0.12",
+    "typescript": "5.6.3",
+    "ultracite": "4.1.6"
+  }
 }

@@ -2,7 +2,7 @@ import { Avatar, Button, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useAuth } from "@pangeacyber/react-auth";
 
-import { useChatContext } from "@src/app/context";
+import { useChatContext } from "@/app/context";
 
 const LoginContainer = styled(Stack)(({ theme }) => ({
   marginLeft: "20px",

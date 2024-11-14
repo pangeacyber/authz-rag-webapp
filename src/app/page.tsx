@@ -1,16 +1,16 @@
 "use client";
 
-import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
+import { ThemeProvider } from "@mui/material/styles";
 import { AuthProvider } from "@pangeacyber/react-auth";
 
+import { ChatProvider } from "./context";
 import Layout from "./features/Layout";
 import PangeaDark from "./theme";
-import { ChatProvider } from "./context";
 
-const LOGIN_URL = process.env.NEXT_PUBLIC_AUTHN_UI_URL || "";
-const CLIENT_TOKEN = process.env.NEXT_PUBLIC_PANGEA_CLIENT_TOKEN || "";
-const PANGEA_DOMAIN = process.env.NEXT_PUBLIC_PANGEA_BASE_DOMAIN || "";
+const LOGIN_URL = process.env.NEXT_PUBLIC_AUTHN_HOSTED_LOGIN || "";
+const CLIENT_TOKEN = process.env.NEXT_PUBLIC_AUTHN_CLIENT_TOKEN || "";
+const PANGEA_DOMAIN = process.env.NEXT_PUBLIC_PANGEA_DOMAIN || "";
 
 export default function Home() {
   return (
@@ -22,11 +22,10 @@ export default function Home() {
       cookieOptions={{
         useCookie: true,
       }}
-      // onLogin={handleLogin}
       loginUrl={LOGIN_URL}
       useStrictStateCheck={false}
     >
-      <ThemeProvider theme={PangeaDark}>
+      <ThemeProvider theme={PangeaDark()}>
         <CssBaseline />
         <ChatProvider>
           <Layout />

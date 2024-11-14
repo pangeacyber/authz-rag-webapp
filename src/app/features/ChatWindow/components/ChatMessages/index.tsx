@@ -1,8 +1,9 @@
-import { FC } from "react";
-import { Avatar, Box, Stack, Typography } from "@mui/material";
 import { MediationOutlined, ReviewsOutlined } from "@mui/icons-material";
-import PangeaLogo from "@src/app/components/Logo";
-import { Colors } from "@src/app/theme";
+import { Avatar, Box, Stack, Typography } from "@mui/material";
+import type { FC } from "react";
+
+import PangeaLogo from "@/app/components/Logo";
+import { Colors } from "@/app/theme";
 
 interface UserPromptProps {
   message: string;
@@ -78,39 +79,45 @@ export const LlmResponse: FC<LlmMessageProps> = ({ message }) => {
 };
 
 export const AiGuardMessage: FC<AiGuardProps> = ({ findings }) => {
-  const findingsJSON = JSON.parse(findings);
-  const malicous = findingsJSON?.malicious_count || 0;
-  const injection = findingsJSON?.prompt_injection_count || 0;
+  const findingsJson = JSON.parse(findings);
+  const malicous = findingsJson?.malicious_count || 0;
+  const injection = findingsJson?.prompt_injection_count || 0;
   // const artifacts = findingsJSON?.artifact_count || 0;
-  const redacted = findingsJSON?.security_issues?.redact_rule_match_count || 0;
+  const redacted = findingsJson?.security_issues?.redact_rule_match_count || 0;
   // const ips = findingsJSON?.security_issues?.malicious_ip_count || 0;
   // const domains = findingsJSON?.security_issues?.malicious_domain_count || 0;
   // const urls = findingsJSON?.security_issues?.malicious_url_count || 0;
   const emails =
-    findingsJSON?.security_issues?.compromised_email_addresses || 0;
+    findingsJson?.security_issues?.compromised_email_addresses || 0;
 
   let result = "Findings: ";
   let addPipe = false;
 
   if (injection) {
     addPipe = true;
-    result += `Prompt injection`;
+    result += "Prompt injection";
   }
 
   if (redacted) {
-    if (addPipe) result += " | ";
+    if (addPipe) {
+      result += " | ";
+    }
     result += `${redacted} item${redacted > 1 ? "s" : ""} redacted`;
     addPipe = true;
   }
 
   if (malicous) {
-    if (addPipe) result += " | ";
+    if (addPipe) {
+      result += " | ";
+    }
     result += `${malicous} malicous item${malicous > 1 ? "s" : ""}`;
     addPipe = true;
   }
 
   if (emails) {
-    if (addPipe) result += " | ";
+    if (addPipe) {
+      result += " | ";
+    }
     result += `${emails} compromised email${emails > 1 ? "s" : ""}`;
     addPipe = true;
   }
@@ -145,10 +152,10 @@ export const AiGuardMessage: FC<AiGuardProps> = ({ findings }) => {
 };
 
 export const PromptGuardMessage: FC<PromptGuardProps> = ({ findings }) => {
-  const findingsJSON = JSON.parse(findings);
-  const verdict = findingsJSON?.detected ? "Detected" : "Benign";
-  const confidence = findingsJSON?.confidence
-    ? `${findingsJSON.confidence}%`
+  const findingsJson = JSON.parse(findings);
+  const verdict = findingsJson?.detected ? "Detected" : "Benign";
+  const confidence = findingsJson?.confidence
+    ? `${findingsJson.confidence}%`
     : "";
 
   return (

@@ -1,91 +1,64 @@
 import type { NextRequest } from "next/server";
 
-import { delay } from "@src/utils";
+import { delay } from "../../utils";
 
-export async function validateToken(request: NextRequest) {
+type ValidatedToken =
+  | { success: true; username: string; profile: Record<string, string> }
+  | { success: false; username: undefined; profile: undefined };
+
+const BEARER_RE = /^bearer/i;
+
+export async function validateToken(
+  request: NextRequest,
+): Promise<ValidatedToken> {
   const auth = request.headers.get("Authorization");
-  const token = auth?.match(/^bearer/i) ? auth.split(" ")[1] : "";
+  const token = auth?.match(BEARER_RE) ? auth.split(" ")[1] : "";
 
   if (!token) {
-    return { success: false, username: undefined };
-  } else {
-    const url = getUrl("authn", "v2/client/token/check");
-    const body = { token };
-
-    const { success, response } = await postRequest(url, body, true);
-
-    return { success, username: response?.result?.owner };
+    return { success: false, username: undefined, profile: undefined };
   }
-}
 
-export async function auditLogRequest(data: any) {
-  const url = getUrl("audit", "v1/log");
-  const now = new Date();
-
-  // Add timestamp to event
-  data.event.timestamp = now.toISOString();
-
-  const { success, response } = await postRequest(url, data);
-
-  if (!success) {
-    console.log("AUDIT LOG ERROR:", response.result.errors);
-  }
-}
-
-export async function auditSearchRequest(data: any) {
-  const url = getUrl("audit", "v1/search");
-
-  const { success, response } = await postRequest(url, data);
-
-  if (!success) {
-    console.log("AUDIT SEARCH ERROR:", response.result.errors);
-    return { error: response.result.errors };
-  } else {
-    return response.result;
-  }
+  const url = getUrl("authn", "v2/client/token/check");
+  const body = { token };
+  const { success, response } = await postRequest(url, body, true);
+  return {
+    success,
+    username: response?.result?.owner,
+    profile: response?.result?.profile,
+  };
 }
 
 export async function postRequest(
   url: string,
-  body: any,
+  body: unknown,
   useClientToken = false,
 ) {
-  try {
-    let response = await fetch(url, {
-      method: "POST",
-      ...getHeaders(useClientToken),
-      body: JSON.stringify(body),
-    });
+  let response = await fetch(url, {
+    method: "POST",
+    ...getHeaders(useClientToken),
+    body: JSON.stringify(body),
+  });
 
-    if (response.status === 202) {
-      response = await handleAsync(response);
-    }
-
-    const json = await response.json();
-    const success = json.status === "Success";
-
-    return { success, response: json };
-  } catch (err) {
-    throw err;
+  if (response.status === 202) {
+    response = await handleAsync(response);
   }
+
+  const json = await response.json();
+  const success = json.status === "Success";
+
+  return { success, response: json };
 }
 
-export async function getRequest(url: string) {
-  try {
-    const response: any = await fetch(url, {
-      method: "GET",
-      ...getHeaders(),
-    });
-
-    return response;
-  } catch (err) {
-    throw err;
-  }
+export function getRequest(url: string) {
+  return fetch(url, {
+    method: "GET",
+    ...getHeaders(),
+  });
 }
 
 async function handleAsync(response: Response): Promise<Response> {
   const data = await response.json();
-  const url = `https://${process.env.NEXT_PUBLIC_PANGEA_BASE_DOMAIN}/request/${data?.request_id}`;
+  const url = `https://${process.env.NEXT_PUBLIC_PANGEA_DOMAIN}/request/${data?.request_id}`;
   const maxRetries = 3;
   let retryCount = 1;
 
@@ -93,7 +66,6 @@ async function handleAsync(response: Response): Promise<Response> {
     retryCount += 1;
     const waitTime = retryCount * retryCount * 1000;
 
-    // eslint-disable-next-line no-await-in-loop
     await delay(waitTime);
     response = await getRequest(url);
   }
@@ -102,16 +74,14 @@ async function handleAsync(response: Response): Promise<Response> {
 }
 
 export function getUrl(service: string, endpoint: string): string {
-  return `https://${service}.${process.env.NEXT_PUBLIC_PANGEA_BASE_DOMAIN}/${endpoint}`;
+  return `https://${service}.${process.env.NEXT_PUBLIC_PANGEA_DOMAIN}/${endpoint}`;
 }
 
-export function getHeaders(useClientToken = false): any {
-  const options = {
+export function getHeaders(useClientToken = false) {
+  return {
     headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${useClientToken ? process.env.NEXT_PUBLIC_PANGEA_CLIENT_TOKEN : process.env.PANGEA_SERVICE_TOKEN}`,
+      authorization: `Bearer ${useClientToken ? process.env.NEXT_PUBLIC_AUTHN_CLIENT_TOKEN : process.env.PANGEA_SERVICE_TOKEN}`,
+      "content-type": "application/json",
     },
   };
-
-  return options;
 }

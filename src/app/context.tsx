@@ -1,6 +1,6 @@
 import {
-  FC,
-  ReactNode,
+  type FC,
+  type ReactNode,
   createContext,
   useContext,
   useEffect,
@@ -16,7 +16,7 @@ export interface ChatContextProps {
   promptGuardEnabled: boolean;
   dataGuardEnabled: boolean;
   sidePanelOpen: boolean;
-  auditPanelOpen: boolean;
+  authzEnabled: boolean;
   loginOpen: boolean;
   setLoading: (value: boolean) => void;
   setSystemPrompt: (value: string) => void;
@@ -24,7 +24,7 @@ export interface ChatContextProps {
   setPromptGuardEnabled: (value: boolean) => void;
   setDataGuardEnabled: (value: boolean) => void;
   setSidePanelOpen: (value: boolean) => void;
-  setAuditPanelOpen: (value: boolean) => void;
+  setAuthzEnabled: (value: boolean) => void;
   setLoginOpen: (value: boolean) => void;
 }
 
@@ -35,7 +35,7 @@ const ChatContext = createContext<ChatContextProps>({
   promptGuardEnabled: true,
   dataGuardEnabled: true,
   sidePanelOpen: true,
-  auditPanelOpen: false,
+  authzEnabled: false,
   loginOpen: false,
   setLoading: () => {},
   setSystemPrompt: () => {},
@@ -43,7 +43,7 @@ const ChatContext = createContext<ChatContextProps>({
   setPromptGuardEnabled: () => {},
   setDataGuardEnabled: () => {},
   setSidePanelOpen: () => {},
-  setAuditPanelOpen: () => {},
+  setAuthzEnabled: () => {},
   setLoginOpen: () => {},
 });
 
@@ -54,10 +54,12 @@ export interface ChatProviderProps {
 export interface ChatMessage {
   hash: string;
   type: string;
-  context?: any;
+  context?: unknown;
   input?: string;
-  output?: any;
-  findings?: any;
+  output?: string;
+  findings?: string;
+
+  // biome-ignore lint/style/useNamingConvention: matches API response
   malicious_count?: number;
 }
 
@@ -72,23 +74,18 @@ export const ChatProvider: FC<ChatProviderProps> = ({ children }) => {
     "You're a helpful assistant.",
   );
   const [userPrompt, setUserPrompt] = useState("");
-  const [promptGuardEnabled, setPromptGuardEnabled] = useState(true);
-  const [dataGuardEnabled, setDataGuardEnabled] = useState(true);
+  const [authzEnabled, setAuthzEnabled] = useState(true);
+  const [promptGuardEnabled, setPromptGuardEnabled] = useState(false);
+  const [dataGuardEnabled, setDataGuardEnabled] = useState(false);
   const [sidePanelOpen, setSidePanelOpen] = useState(true);
-  const [auditPanelOpen, setAuditPanelOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
 
   useEffect(() => {
     if (!mounted.current) {
       mounted.current = true;
 
-      const storedSystemPrompt = localStorage.getItem(SYSTEM_PROMPT_KEY);
       const storedUserPrompt = localStorage.getItem(USER_PROMPT_KEY);
-
-      if (!!storedSystemPrompt) {
-        setSystemPrompt(storedSystemPrompt);
-      }
-      if (!!storedUserPrompt) {
+      if (storedUserPrompt) {
         setUserPrompt(storedUserPrompt);
       }
     }
@@ -110,7 +107,7 @@ export const ChatProvider: FC<ChatProviderProps> = ({ children }) => {
       promptGuardEnabled,
       dataGuardEnabled,
       sidePanelOpen,
-      auditPanelOpen,
+      authzEnabled,
       loginOpen,
       setLoading,
       setSystemPrompt,
@@ -118,7 +115,7 @@ export const ChatProvider: FC<ChatProviderProps> = ({ children }) => {
       setPromptGuardEnabled,
       setDataGuardEnabled,
       setSidePanelOpen,
-      setAuditPanelOpen,
+      setAuthzEnabled,
       setLoginOpen,
     }),
     [
@@ -128,16 +125,8 @@ export const ChatProvider: FC<ChatProviderProps> = ({ children }) => {
       promptGuardEnabled,
       dataGuardEnabled,
       sidePanelOpen,
-      auditPanelOpen,
+      authzEnabled,
       loginOpen,
-      setLoading,
-      setSystemPrompt,
-      setUserPrompt,
-      setPromptGuardEnabled,
-      setDataGuardEnabled,
-      setSidePanelOpen,
-      setAuditPanelOpen,
-      setLoginOpen,
     ],
   );
 
