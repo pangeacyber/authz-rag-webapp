@@ -2,3 +2,4 @@
 .tsimp
 node_modules
 .env
+credentials.json

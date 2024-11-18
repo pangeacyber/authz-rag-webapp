@@ -4,6 +4,11 @@ import { type AuthZ, AuthZService, PangeaConfig } from "pangea-node-sdk";
 
 import { GoogleDriveRetriever } from "../src/google";
 
+import { setGoogleDriveCredentials } from "../src/utils";
+
+/** Set up the Google Drive credentials in a process.env variable. */
+setGoogleDriveCredentials();
+
 /** Map Google Drive roles to AuthZ File Drive schema roles. */
 const GDRIVE_ROLE_TO_AUTHZ_ROLE: Record<string, string> = {
   owner: "owner",

@@ -9,6 +9,11 @@ import { GoogleDriveRetriever } from "@/google";
 
 import { validateToken } from "../requests";
 
+import { setGoogleDriveCredentials } from "@/utils";
+
+/** Set up the Google Drive credentials in a process.env variable. */
+setGoogleDriveCredentials();
+
 const SYSTEM_PROMPT = ChatPromptTemplate.fromMessages([
   [
     "system",
