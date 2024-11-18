@@ -4,41 +4,29 @@ import fs from "node:fs";
 import path from "node:path";
 
 /**
- * Read a potentially multi-line JSON file and convert it into a single-line JSON string.
- * Set the JSON string in a process.env variable.
+ * Read and parse a JSON file.
  *
- * @param {string} jsonFilePath - Path to the credentials file.
- * @param {string} processEnvName - Name of the process.env variable to set.
- * @returns {undefined}
+ * @param {string} jsonFilePath - Path to the JSON file.
+ * @returns {object}
  */
-const setProcessEnvJson = (
+const readJsonFile = (
   jsonFilePath: fs.PathOrFileDescriptor,
-  processEnvName: string,
-): void => {
+): Record<string, string> => {
   try {
     const json = fs.readFileSync(jsonFilePath, "utf8");
-    const jsonObject = JSON.parse(json);
-    const singleLineJson = JSON.stringify(jsonObject);
-
-    process.env[processEnvName] = singleLineJson;
+    return JSON.parse(json);
   } catch (error) {
-    console.error(
-      `Error setting up ${processEnvName} environment variable:`,
-      error,
-    );
+    console.error("Error reading JSON file:", error);
     throw error;
   }
 };
 
 /**
- * Set up the Google Drive credentials in the process.env variable.
- * @returns {undefined}
+ * Get Google Drive credentials from a JSON file.
+ * @returns {object}
  */
-export const setGoogleDriveCredentials = (): void => {
-  setProcessEnvJson(
-    path.resolve("credentials.json"),
-    "GOOGLE_DRIVE_CREDENTIALS",
-  );
+export const getGoogleDriveCredentials = (): Record<string, string> => {
+  return readJsonFile("credentials.json");
 };
 
 export const delay = (time: number) => {
