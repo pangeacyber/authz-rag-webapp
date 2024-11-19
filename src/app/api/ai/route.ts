@@ -9,6 +9,8 @@ import { GoogleDriveRetriever } from "@/google";
 
 import { validateToken } from "../requests";
 
+import { getGoogleDriveCredentials } from "@/utils";
+
 const SYSTEM_PROMPT = ChatPromptTemplate.fromMessages([
   [
     "system",
@@ -22,7 +24,7 @@ Answer:`,
 ]);
 
 const retriever = new GoogleDriveRetriever({
-  credentials: JSON.parse(process.env.GOOGLE_DRIVE_CREDENTIALS!),
+  credentials: getGoogleDriveCredentials()!,
   folderId: process.env.GOOGLE_DRIVE_FOLDER_ID!,
   scopes: ["https://www.googleapis.com/auth/drive.readonly"],
 });

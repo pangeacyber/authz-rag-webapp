@@ -3,6 +3,7 @@ import { drive, auth as gauth } from "@googleapis/drive";
 import { type AuthZ, AuthZService, PangeaConfig } from "pangea-node-sdk";
 
 import { GoogleDriveRetriever } from "../src/google";
+import { getGoogleDriveCredentials } from "../src/utils";
 
 /** Map Google Drive roles to AuthZ File Drive schema roles. */
 const GDRIVE_ROLE_TO_AUTHZ_ROLE: Record<string, string> = {
@@ -15,7 +16,7 @@ const SCOPES = ["https://www.googleapis.com/auth/drive.readonly"];
 
 config();
 
-const googleCredentials = JSON.parse(process.env.GOOGLE_DRIVE_CREDENTIALS!);
+const googleCredentials = getGoogleDriveCredentials();
 const retriever = new GoogleDriveRetriever({
   credentials: googleCredentials,
   folderId: process.env.GOOGLE_DRIVE_FOLDER_ID!,
