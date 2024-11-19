@@ -57,7 +57,7 @@ user permissions.
      }
      ```
 
-  3. Share the Google Drive folder with the service account's email, granting it Editor access so it can query file permissions as needed.
+  3. Share the Google Drive folder with the service account's email - noted as `client_email` in the `credentials.json` file - granting it Editor access so it can query file permissions as needed.
 
 ## Setup
 
