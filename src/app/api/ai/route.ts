@@ -33,7 +33,7 @@ const authz = new AuthZService(
   new PangeaConfig({ domain: process.env.NEXT_PUBLIC_PANGEA_DOMAIN }),
 );
 const model = new ChatOpenAI({
-  model: "gpt-4o",
+  model: "gpt-4o-mini",
   maxTokens: 512,
   temperature: 0.5,
 });
