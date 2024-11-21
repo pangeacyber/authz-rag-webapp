@@ -30,7 +30,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
-    "@dotenvx/dotenvx": "1.24.1",
+    "@dotenvx/dotenvx": "1.24.2",
     "@tsconfig/next": "2.0.3",
     "@types/node": "22.9.0",
     "@types/react": "18.3.12",
