@@ -1,16 +1,16 @@
 import { CircularProgress, Stack } from "@mui/material";
-import { type FC, useEffect, useMemo, useRef } from "react";
-
 import { useAuth } from "@pangeacyber/react-auth";
+import { type FC, useCallback, useMemo } from "react";
+
+import { type ChatMessage, useChatContext } from "@/app/context";
+import { Colors } from "@/app/theme";
+
 import {
   AiGuardMessage,
   LlmResponse,
   PromptGuardMessage,
   UserPromptMessage,
 } from "../ChatMessages";
-
-import { type ChatMessage, useChatContext } from "@/app/context";
-import { Colors } from "@/app/theme";
 
 interface Props {
   messages: ChatMessage[];
@@ -19,19 +19,14 @@ interface Props {
 const ChatScroller: FC<Props> = ({ messages }) => {
   const { user } = useAuth();
   const { loading } = useChatContext();
-  const scollRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    if (scollRef.current && !loading) {
-      scollRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [loading]);
-
-  useEffect(() => {
-    if (scollRef.current && !loading) {
-      scollRef.current.scrollIntoView();
-    }
-  }, [loading]);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: scroll to the bottom whenever new messages appear
+  const scroller = useCallback(
+    (node: Element | null) => {
+      node?.scrollIntoView({ behavior: "smooth" });
+    },
+    [messages],
+  );
 
   const messageContent = useMemo(() => {
     return (
@@ -72,7 +67,6 @@ const ChatScroller: FC<Props> = ({ messages }) => {
               return null;
           }
         })}
-        <div ref={scollRef} />
       </Stack>
     );
   }, [messages, user]);
@@ -91,7 +85,10 @@ const ChatScroller: FC<Props> = ({ messages }) => {
           <CircularProgress sx={{ color: Colors.secondary }} />
         </Stack>
       ) : (
-        <>{messageContent}</>
+        <>
+          {messageContent}
+          <div ref={scroller} />
+        </>
       )}
     </Stack>
   );
