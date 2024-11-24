@@ -158,6 +158,7 @@ const ChatWindow = () => {
       output: llmResponse,
     };
 
+    setUserPrompt("");
     setMessages((prevMessages) => [
       ...prevMessages,
       llmMsg,
