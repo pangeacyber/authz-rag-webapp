@@ -18,6 +18,9 @@ export interface ChatContextProps {
   sidePanelOpen: boolean;
   authzEnabled: boolean;
   loginOpen: boolean;
+  lastPromptGuardResponse: object;
+  aiGuardResponses: readonly [object, object];
+  authzResponses: readonly object[];
   setLoading: (value: boolean) => void;
   setSystemPrompt: (value: string) => void;
   setUserPrompt: (value: string) => void;
@@ -26,6 +29,9 @@ export interface ChatContextProps {
   setSidePanelOpen: (value: boolean) => void;
   setAuthzEnabled: (value: boolean) => void;
   setLoginOpen: (value: boolean) => void;
+  setLastPromptGuardResponse: (value: object) => void;
+  setAiGuardResponses: (value: readonly [object, object]) => void;
+  setAuthzResponses: (value: readonly object[]) => void;
 }
 
 const ChatContext = createContext<ChatContextProps>({
@@ -37,6 +43,9 @@ const ChatContext = createContext<ChatContextProps>({
   sidePanelOpen: true,
   authzEnabled: false,
   loginOpen: false,
+  lastPromptGuardResponse: {},
+  aiGuardResponses: [{}, {}],
+  authzResponses: [],
   setLoading: () => {},
   setSystemPrompt: () => {},
   setUserPrompt: () => {},
@@ -45,6 +54,9 @@ const ChatContext = createContext<ChatContextProps>({
   setSidePanelOpen: () => {},
   setAuthzEnabled: () => {},
   setLoginOpen: () => {},
+  setLastPromptGuardResponse: () => {},
+  setAiGuardResponses: () => {},
+  setAuthzResponses: () => {},
 });
 
 export interface ChatProviderProps {
@@ -79,6 +91,11 @@ export const ChatProvider: FC<ChatProviderProps> = ({ children }) => {
   const [dataGuardEnabled, setDataGuardEnabled] = useState(false);
   const [sidePanelOpen, setSidePanelOpen] = useState(true);
   const [loginOpen, setLoginOpen] = useState(false);
+  const [lastPromptGuardResponse, setLastPromptGuardResponse] = useState({});
+  const [aiGuardResponses, setAiGuardResponses] = useState<
+    readonly [object, object]
+  >([{}, {}]);
+  const [authzResponses, setAuthzResponses] = useState<readonly object[]>([]);
 
   useEffect(() => {
     if (!mounted.current) {
@@ -109,6 +126,9 @@ export const ChatProvider: FC<ChatProviderProps> = ({ children }) => {
       sidePanelOpen,
       authzEnabled,
       loginOpen,
+      lastPromptGuardResponse,
+      aiGuardResponses,
+      authzResponses,
       setLoading,
       setSystemPrompt,
       setUserPrompt,
@@ -117,6 +137,9 @@ export const ChatProvider: FC<ChatProviderProps> = ({ children }) => {
       setSidePanelOpen,
       setAuthzEnabled,
       setLoginOpen,
+      setLastPromptGuardResponse,
+      setAiGuardResponses,
+      setAuthzResponses,
     }),
     [
       loading,
@@ -127,6 +150,9 @@ export const ChatProvider: FC<ChatProviderProps> = ({ children }) => {
       sidePanelOpen,
       authzEnabled,
       loginOpen,
+      lastPromptGuardResponse,
+      aiGuardResponses,
+      authzResponses,
     ],
   );
 

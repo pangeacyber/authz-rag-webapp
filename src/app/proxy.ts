@@ -1,24 +1,35 @@
+import type { AIGuard, AuthZ, PromptGuard } from "pangea-node-sdk";
+
+export interface ResponseObject<M> {
+  request_id: string;
+  request_time: string;
+  response_time: string;
+  status: string;
+  result: M;
+  summary: string;
+}
+
 export const dataGuardProxyRequest = (
   token: string,
   body: unknown,
-  // biome-ignore lint/style/useNamingConvention: matches API response
-): Promise<{ findings: unknown; redacted_prompt: string }> => {
+): Promise<ResponseObject<AIGuard.TextGuardResult>> => {
   return baseProxyRequest(token, "data", "", body);
 };
 
 export const promptGuardProxyRequest = (
   token: string,
   body: unknown,
-): Promise<{
-  detected: boolean;
-}> => {
+): Promise<ResponseObject<PromptGuard.GuardResult>> => {
   return baseProxyRequest(token, "prompt", "", body);
 };
 
 export const aiProxyRequest = (
   token: string,
   body: unknown,
-): Promise<string> => {
+): Promise<{
+  reply: string;
+  authzResponses: ResponseObject<AuthZ.CheckResult>[];
+}> => {
   return baseProxyRequest(token, "ai", "", body);
 };
 

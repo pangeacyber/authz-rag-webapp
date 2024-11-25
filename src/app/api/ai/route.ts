@@ -59,6 +59,8 @@ export async function POST(request: NextRequest) {
   // Get all documents.
   let docs = await retriever.invoke("");
 
+  const authzResponses: object[] = [];
+
   // Filter documents based on user's permissions in AuthZ.
   if (body.authz) {
     docs = await Promise.all(
@@ -67,6 +69,15 @@ export async function POST(request: NextRequest) {
           subject: { type: "user", id: username },
           action: "read",
           resource: { type: "file", id: doc.id },
+          debug: true,
+        });
+        authzResponses.push({
+          request_id: response.request_id,
+          request_time: response.request_time,
+          response_time: response.response_time,
+          result: response.result,
+          status: response.status,
+          summary: response.summary,
         });
         return response.result.allowed ? doc : null;
       }),
@@ -79,5 +90,8 @@ export async function POST(request: NextRequest) {
     context: docs.map((doc) => doc.pageContent).join("\n\n"),
     input: [new HumanMessage(body.userPrompt)],
   });
-  return Response.json(llmReply);
+  return Response.json({
+    reply: llmReply,
+    authzResponses,
+  });
 }
