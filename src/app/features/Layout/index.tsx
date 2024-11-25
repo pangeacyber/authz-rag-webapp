@@ -1,13 +1,14 @@
 import { Box, Button, Drawer, Modal, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-
 import { useAuth } from "@pangeacyber/react-auth";
 
 import PangeaLogo from "@/app/components/Logo";
 import SideBar from "@/app/components/SideBar";
 import { useChatContext } from "@/app/context";
 import { Colors } from "@/app/theme";
+
 import ChatWindow from "../ChatWindow";
+import ResponsesSidePanel from "../ResponsesSidePanel";
 import SidePanel from "../SidePanel";
 
 const panelOpenWidth = 330;
@@ -74,6 +75,23 @@ const Layout = () => {
         <Main open={sidePanelOpen}>
           <ChatWindow />
         </Main>
+
+        <Drawer
+          sx={{
+            width: panelOpenWidth * 1.5,
+            flexShrink: 0,
+            "& .MuiDrawer-paper": {
+              width: panelOpenWidth * 1.5,
+              boxSizing: "border-box",
+              borderLeft: "none",
+            },
+          }}
+          open={true}
+          variant="persistent"
+          anchor="right"
+        >
+          <ResponsesSidePanel open={true} onClose={() => {}} />
+        </Drawer>
       </Box>
       <Modal open={loginOpen} onClose={handleLoginClose}>
         <Stack alignItems="center" justifyContent="center" height="100vh">

@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
   const { success, response } = await postRequest(url, body);
 
   if (success) {
-    return new Response(JSON.stringify(response.result));
+    return Response.json(response);
   }
-  return new Response(JSON.stringify(response.result), { status: 400 });
+  return Response.json(response, { status: 400 });
 }

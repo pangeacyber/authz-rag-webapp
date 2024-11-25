@@ -13,9 +13,11 @@ import {
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useAuth } from "@pangeacyber/react-auth";
+import type { AIGuard } from "pangea-node-sdk";
 import { type ChangeEvent, type KeyboardEvent, useState } from "react";
 
 import { type ChatMessage, useChatContext } from "@/app/context";
+import type { ResponseObject } from "@/app/proxy";
 import { Colors } from "@/app/theme";
 
 import ChatScroller from "./components/ChatScroller";
@@ -45,6 +47,9 @@ const ChatWindow = () => {
     userPrompt,
     setUserPrompt,
     setLoginOpen,
+    setLastPromptGuardResponse,
+    setAiGuardResponses,
+    setAuthzResponses,
   } = useChatContext();
   const { authenticated, user } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -77,6 +82,7 @@ const ChatWindow = () => {
 
       try {
         const promptResp = await callPromptGuard(token, userPrompt);
+        setLastPromptGuardResponse(promptResp);
         const pgMsg: ChatMessage = {
           hash: hashCode(JSON.stringify(promptResp)),
           type: "prompt_guard",
@@ -85,7 +91,7 @@ const ChatWindow = () => {
         setMessages((prevMessages) => [...prevMessages, pgMsg]);
 
         // don't send to the llm if prompt is malicious
-        if (promptResp?.detected) {
+        if (promptResp.result.detected) {
           processingError("Processing halted: suspicious prompt");
           return;
         }
@@ -96,20 +102,22 @@ const ChatWindow = () => {
     }
 
     let llmUserPrompt = userPrompt;
+    let guardedInput: ResponseObject<AIGuard.TextGuardResult>;
 
     if (dataGuardEnabled) {
       setProcessing("Checking user prompt with AI Guard");
 
       try {
-        const dataResp = await callInputDataGuard(token, userPrompt);
+        guardedInput = await callInputDataGuard(token, userPrompt);
+        setAiGuardResponses([guardedInput, {}]);
         const dgiMsg: ChatMessage = {
-          hash: hashCode(JSON.stringify(dataResp)),
+          hash: hashCode(JSON.stringify(guardedInput)),
           type: "ai_guard",
-          findings: JSON.stringify(dataResp.findings),
+          findings: JSON.stringify(guardedInput.result.findings),
         };
         setMessages((prevMessages) => [...prevMessages, dgiMsg]);
 
-        llmUserPrompt = dataResp.redacted_prompt;
+        llmUserPrompt = guardedInput.result.redacted_prompt;
       } catch (_) {
         processingError("AI Guard call failed, please try again");
         return;
@@ -128,7 +136,13 @@ const ChatWindow = () => {
     let llmResponse = "";
 
     try {
-      llmResponse = await sendUserMessage(token, llmUserPrompt, authzEnabled);
+      const llmResponseStruct = await sendUserMessage(
+        token,
+        llmUserPrompt,
+        authzEnabled,
+      );
+      llmResponse = llmResponseStruct.reply;
+      setAuthzResponses(llmResponseStruct.authzResponses);
     } catch (_) {
       processingError("LLM call failed, please try again");
       return;
@@ -139,14 +153,15 @@ const ChatWindow = () => {
 
       try {
         const dataResp = await callResponseDataGuard(token, llmResponse);
+        setAiGuardResponses([guardedInput!, dataResp]);
         const dgrMsg: ChatMessage = {
           hash: hashCode(JSON.stringify(dataResp)),
           type: "ai_guard",
-          findings: JSON.stringify(dataResp.findings),
+          findings: JSON.stringify(dataResp.result.findings),
         };
         dataGuardMessages.push(dgrMsg);
 
-        llmResponse = dataResp.redacted_prompt;
+        llmResponse = dataResp.result.redacted_prompt;
       } catch (_) {
         processingError("AI Guard call failed, please try again");
       }

@@ -1,8 +1,10 @@
 import { MediationOutlined, ReviewsOutlined } from "@mui/icons-material";
 import { Avatar, Box, Stack, Typography } from "@mui/material";
+import type { AIGuard, PromptGuard } from "pangea-node-sdk";
 import type { FC } from "react";
 
 import PangeaLogo from "@/app/components/Logo";
+import type { ResponseObject } from "@/app/proxy";
 import { Colors } from "@/app/theme";
 
 interface UserPromptProps {
@@ -79,11 +81,14 @@ export const LlmResponse: FC<LlmMessageProps> = ({ message }) => {
 };
 
 export const AiGuardMessage: FC<AiGuardProps> = ({ findings }) => {
-  const findingsJson = JSON.parse(findings);
-  const malicous = findingsJson?.malicious_count || 0;
-  const injection = findingsJson?.prompt_injection_count || 0;
+  const findingsJson: AIGuard.TextGuardFindings = JSON.parse(findings);
+  const malicious = findingsJson.malicious_count || 0;
+
+  // biome-ignore lint/suspicious/noExplicitAny: requires upstream fix.
+  const injection = (findingsJson as any).prompt_injection_count || 0;
+
   // const artifacts = findingsJSON?.artifact_count || 0;
-  const redacted = findingsJson?.security_issues?.redact_rule_match_count || 0;
+  const redacted = findingsJson.security_issues?.redact_rule_match_count || 0;
   // const ips = findingsJSON?.security_issues?.malicious_ip_count || 0;
   // const domains = findingsJSON?.security_issues?.malicious_domain_count || 0;
   // const urls = findingsJSON?.security_issues?.malicious_url_count || 0;
@@ -106,11 +111,11 @@ export const AiGuardMessage: FC<AiGuardProps> = ({ findings }) => {
     addPipe = true;
   }
 
-  if (malicous) {
+  if (malicious) {
     if (addPipe) {
       result += " | ";
     }
-    result += `${malicous} malicous item${malicous > 1 ? "s" : ""}`;
+    result += `${malicious} malicous item${malicious > 1 ? "s" : ""}`;
     addPipe = true;
   }
 
@@ -122,7 +127,7 @@ export const AiGuardMessage: FC<AiGuardProps> = ({ findings }) => {
     addPipe = true;
   }
 
-  if (!(redacted || injection || malicous || emails)) {
+  if (!(redacted || injection || malicious || emails)) {
     result += "None";
   }
 
@@ -152,10 +157,11 @@ export const AiGuardMessage: FC<AiGuardProps> = ({ findings }) => {
 };
 
 export const PromptGuardMessage: FC<PromptGuardProps> = ({ findings }) => {
-  const findingsJson = JSON.parse(findings);
-  const verdict = findingsJson?.detected ? "Detected" : "Benign";
-  const confidence = findingsJson?.confidence
-    ? `${findingsJson.confidence}%`
+  const findingsJson: ResponseObject<PromptGuard.GuardResult> =
+    JSON.parse(findings);
+  const verdict = findingsJson.result.detected ? "Detected" : "Benign";
+  const confidence = findingsJson.result.confidence
+    ? `${findingsJson.result.confidence}%`
     : "";
 
   return (
