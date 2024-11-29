@@ -34,7 +34,7 @@
     "@biomejs/biome": "1.9.4",
     "@dotenvx/dotenvx": "1.25.0",
     "@tsconfig/next": "2.0.3",
-    "@types/node": "22.9.4",
+    "@types/node": "22.10.0",
     "@types/react": "18.3.12",
     "@types/react-dom": "18.3.1",
     "tsimp": "2.0.12",
