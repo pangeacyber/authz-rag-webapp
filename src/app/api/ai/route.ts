@@ -1,15 +1,16 @@
 import { HumanMessage } from "@langchain/core/messages";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
-import { ChatOpenAI } from "@langchain/openai";
+import { ChatOpenAI, OpenAIEmbeddings } from "@langchain/openai";
+import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
+import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import type { NextRequest } from "next/server";
 import { AuthZService, PangeaConfig } from "pangea-node-sdk";
 
 import { GoogleDriveRetriever } from "@/google";
+import { getGoogleDriveCredentials } from "@/utils";
 
 import { validateToken } from "../requests";
-
-import { getGoogleDriveCredentials } from "@/utils";
 
 const SYSTEM_PROMPT = ChatPromptTemplate.fromMessages([
   [
@@ -23,21 +24,23 @@ Answer:`,
   ],
 ]);
 
-const retriever = new GoogleDriveRetriever({
+const loader = new GoogleDriveRetriever({
   credentials: getGoogleDriveCredentials()!,
   folderId: process.env.GOOGLE_DRIVE_FOLDER_ID!,
   scopes: ["https://www.googleapis.com/auth/drive.readonly"],
 });
+
+const model = new ChatOpenAI({ model: "gpt-4o-mini", temperature: 0.5 });
+const chain = await createStuffDocumentsChain({
+  prompt: SYSTEM_PROMPT,
+  llm: model,
+  outputParser: new StringOutputParser(),
+});
+
 const authz = new AuthZService(
   process.env.PANGEA_SERVICE_TOKEN!,
   new PangeaConfig({ domain: process.env.NEXT_PUBLIC_PANGEA_DOMAIN }),
 );
-const model = new ChatOpenAI({
-  model: "gpt-4o-mini",
-  maxTokens: 512,
-  temperature: 0.5,
-});
-const chain = SYSTEM_PROMPT.pipe(model).pipe(new StringOutputParser());
 
 interface RequestBody {
   /** Whether or not to apply AuthZ. */
@@ -56,10 +59,14 @@ export async function POST(request: NextRequest) {
 
   const body: RequestBody = await request.json();
 
-  // Get all documents.
-  let docs = await retriever.invoke("");
-
   const authzResponses: object[] = [];
+
+  const vectorStore = await MemoryVectorStore.fromDocuments(
+    await loader.invoke(""),
+    new OpenAIEmbeddings(),
+  );
+  const retriever = vectorStore.asRetriever();
+  let docs = await retriever.invoke(body.userPrompt);
 
   // Filter documents based on user's permissions in AuthZ.
   if (body.authz) {
@@ -87,7 +94,7 @@ export async function POST(request: NextRequest) {
   const llmReply = await chain.invoke({
     firstName: profile.first_name,
     lastName: profile.last_name,
-    context: docs.map((doc) => doc.pageContent).join("\n\n"),
+    context: docs,
     input: [new HumanMessage(body.userPrompt)],
   });
   return Response.json({
