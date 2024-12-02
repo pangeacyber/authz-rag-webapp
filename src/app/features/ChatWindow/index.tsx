@@ -75,6 +75,15 @@ const ChatWindow = () => {
       return;
     }
 
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      {
+        hash: hashCode(userPrompt),
+        type: "user_prompt",
+        input: userPrompt,
+      },
+    ]);
+
     const token = user?.active_token?.token || "";
 
     if (promptGuardEnabled) {
