@@ -13,7 +13,10 @@ import "react-json-view-lite/dist/index.css";
 
 const reactJsonViewStyles = {
   ...darkStyles,
-  container: css`background-color: ${Colors.jsonView.container};`,
+  container: css`
+    background-color: ${Colors.jsonView.container};
+    border-radius: 10px;
+  `,
   label: css`color: ${Colors.jsonView.label};`,
   stringValue: css`color: ${Colors.jsonView.stringValue};`,
 };
