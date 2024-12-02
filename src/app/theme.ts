@@ -19,7 +19,7 @@ export const Colors = {
   borders: "#797C7F",
   card: "#16181A",
   jsonView: {
-    container: "rgb(38, 12, 59)",
+    container: "rgb(51, 53, 55)",
     label: "rgb(248, 194, 102)",
     stringValue: "rgb(255, 255, 255)",
   },
