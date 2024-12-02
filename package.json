@@ -23,6 +23,7 @@
     "@mui/material": "6.1.9",
     "@pangeacyber/react-auth": "0.0.14",
     "google-auth-library": "9.15.0",
+    "langchain": "0.3.6",
     "markdown-table": "3.0.4",
     "next": "15.0.3",
     "pangea-node-sdk": "4.2.0-beta.2",
