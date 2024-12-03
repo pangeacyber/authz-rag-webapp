@@ -1,13 +1,15 @@
 import { css } from "@emotion/css";
-import { Stack, Typography } from "@mui/material";
-import { styled } from "@mui/material/styles";
-import type { FC } from "react";
+import { GlobalStyles, Stack, Typography } from "@mui/material";
+import { type FC, type JSX, useLayoutEffect, useState } from "react";
 import { JsonView, darkStyles } from "react-json-view-lite";
 
 import CollapsablePanel from "@/app/components/CollapsablePanel";
+import { PanelHeader } from "@/app/components/PanelHeader";
 import { useChatContext } from "@/app/context";
 import type { ResponseObject } from "@/app/proxy";
 import { Colors } from "@/app/theme";
+
+import { highlight } from "./utils";
 
 import "react-json-view-lite/dist/index.css";
 
@@ -26,13 +28,27 @@ interface Props {
   onClose: () => void;
 }
 
-const PanelHeader = styled("div")(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  padding: theme.spacing(0, 1),
-  ...theme.mixins.toolbar,
-  justifyContent: "space-between",
-}));
+const SampleCode: FC = () => {
+  const [nodes, setNodes] = useState<JSX.Element | null>(null);
+
+  useLayoutEffect(() => {
+    highlight(`docs = await Promise.all(
+  docs.map(async (doc) => {
+    const response = await authz.check({
+      subject: { type: "user", id: username },
+      action: "read",
+      resource: { type: "file", id: doc.id }
+    });
+    return response.result.allowed ? doc : null;
+  }),
+).then((results) =>
+  results.filter((doc) => doc !== null)
+);
+`).then(setNodes);
+  }, []);
+
+  return nodes ?? <p>Loading...</p>;
+};
 
 const ResponsesSidePanel: FC<Props> = ({ onClose }) => {
   const { lastPromptGuardResponse, aiGuardResponses, authzResponses } =
@@ -83,6 +99,21 @@ const ResponsesSidePanel: FC<Props> = ({ onClose }) => {
                 style={reactJsonViewStyles}
               />
             ))}
+          </Stack>
+        </CollapsablePanel>
+
+        <CollapsablePanel title="Sample code">
+          <Stack gap={1} py={1} fontFamily="monospace">
+            <GlobalStyles
+              styles={{
+                pre: {
+                  borderRadius: "10px",
+                  margin: 0,
+                  padding: "7px",
+                },
+              }}
+            />
+            <SampleCode />
           </Stack>
         </CollapsablePanel>
       </Stack>
