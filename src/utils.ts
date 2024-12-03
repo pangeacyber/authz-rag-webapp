@@ -1,7 +1,5 @@
 // biome-ignore lint: server-side
 import fs from "node:fs";
-// biome-ignore lint: server-side
-import path from "node:path";
 
 /**
  * Read and parse a JSON file.

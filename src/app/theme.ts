@@ -23,6 +23,9 @@ export const Colors = {
     label: "rgb(248, 194, 102)",
     stringValue: "rgb(255, 255, 255)",
   },
+  shiki: {
+    background: "rgb(51, 53, 55)",
+  },
 };
 
 const PangeaDark = () => {
