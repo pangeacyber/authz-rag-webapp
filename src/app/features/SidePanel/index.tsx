@@ -1,10 +1,10 @@
 import ViewSidebarOutlinedIcon from "@mui/icons-material/ViewSidebarOutlined";
 import { IconButton, Stack, Typography } from "@mui/material";
-import { styled } from "@mui/material/styles";
 import type { FC } from "react";
 
 import LoginWidget from "@/app/components/LoginWidget";
 import PangeaLogo from "@/app/components/Logo";
+import { PanelHeader } from "@/app/components/PanelHeader";
 import { Colors } from "@/app/theme";
 
 import SecurityControls from "./components/SecurityControls";
@@ -13,14 +13,6 @@ interface Props {
   open: boolean;
   onClose: () => void;
 }
-
-const PanelHeader = styled("div")(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  padding: theme.spacing(0, 1),
-  ...theme.mixins.toolbar,
-  justifyContent: "space-between",
-}));
 
 const SidePanel: FC<Props> = ({ onClose }) => {
   return (

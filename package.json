@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev --turbo",
     "build": "next build",
     "prestart": "npm run -s build",
     "start": "next start",
@@ -13,23 +13,24 @@
   },
   "dependencies": {
     "@emotion/css": "11.13.5",
-    "@emotion/react": "11.13.5",
-    "@emotion/styled": "11.13.5",
     "@googleapis/drive": "8.14.0",
     "@googleapis/sheets": "9.3.1",
     "@langchain/core": "0.3.19",
     "@langchain/openai": "0.3.14",
     "@mui/icons-material": "6.1.9",
     "@mui/material": "6.1.9",
+    "@mui/material-nextjs": "6.1.9",
     "@pangeacyber/react-auth": "0.0.14",
     "google-auth-library": "9.15.0",
+    "hast-util-to-jsx-runtime": "2.3.2",
     "langchain": "0.3.6",
     "markdown-table": "3.0.4",
     "next": "15.0.3",
     "pangea-node-sdk": "4.2.0-beta.2",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-json-view-lite": "2.0.1"
+    "react-json-view-lite": "2.0.1",
+    "shiki": "1.24.0"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
