@@ -86,7 +86,7 @@ export const ChatProvider: FC<ChatProviderProps> = ({ children }) => {
     "You're a helpful assistant.",
   );
   const [userPrompt, setUserPrompt] = useState("");
-  const [authzEnabled, setAuthzEnabled] = useState(true);
+  const [authzEnabled, setAuthzEnabled] = useState(false);
   const [promptGuardEnabled, setPromptGuardEnabled] = useState(false);
   const [dataGuardEnabled, setDataGuardEnabled] = useState(false);
   const [sidePanelOpen, setSidePanelOpen] = useState(true);
