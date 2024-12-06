@@ -2,6 +2,7 @@ import { HumanMessage } from "@langchain/core/messages";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { ChatOpenAI, OpenAIEmbeddings } from "@langchain/openai";
+import { ChatCloudflareWorkersAI } from "@langchain/cloudflare";
 import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import type { NextRequest } from "next/server";
@@ -30,7 +31,12 @@ const loader = new GoogleDriveRetriever({
   scopes: ["https://www.googleapis.com/auth/drive.readonly"],
 });
 
-const model = new ChatOpenAI({ model: "gpt-4o-mini", temperature: 0.5 });
+// const model = new ChatOpenAI({ model: "gpt-4o-mini", temperature: 0.5 });
+const model = new ChatCloudflareWorkersAI({
+  model: "@cf/meta/llama-3.1-70b-instruct",
+  cloudflareAccountId: process.env.CLOUDFLARE_ACCOUNT_ID,
+  cloudflareApiToken: process.env.CLOUDFLARE_API_TOKEN,
+})
 const chain = await createStuffDocumentsChain({
   prompt: SYSTEM_PROMPT,
   llm: model,
