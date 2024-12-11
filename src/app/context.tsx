@@ -1,3 +1,4 @@
+import type { DocumentInterface } from "@langchain/core/documents";
 import {
   type FC,
   type ReactNode,
@@ -21,6 +22,7 @@ export interface ChatContextProps {
   lastPromptGuardResponse: object;
   aiGuardResponses: readonly [object, object];
   authzResponses: readonly object[];
+  documents: readonly DocumentInterface[];
   setLoading: (value: boolean) => void;
   setSystemPrompt: (value: string) => void;
   setUserPrompt: (value: string) => void;
@@ -32,6 +34,7 @@ export interface ChatContextProps {
   setLastPromptGuardResponse: (value: object) => void;
   setAiGuardResponses: (value: readonly [object, object]) => void;
   setAuthzResponses: (value: readonly object[]) => void;
+  setDocuments: (value: readonly DocumentInterface[]) => void;
 }
 
 const ChatContext = createContext<ChatContextProps>({
@@ -46,6 +49,7 @@ const ChatContext = createContext<ChatContextProps>({
   lastPromptGuardResponse: {},
   aiGuardResponses: [{}, {}],
   authzResponses: [],
+  documents: [],
   setLoading: () => {},
   setSystemPrompt: () => {},
   setUserPrompt: () => {},
@@ -57,6 +61,7 @@ const ChatContext = createContext<ChatContextProps>({
   setLastPromptGuardResponse: () => {},
   setAiGuardResponses: () => {},
   setAuthzResponses: () => {},
+  setDocuments: () => {},
 });
 
 export interface ChatProviderProps {
@@ -96,6 +101,7 @@ export const ChatProvider: FC<ChatProviderProps> = ({ children }) => {
     readonly [object, object]
   >([{}, {}]);
   const [authzResponses, setAuthzResponses] = useState<readonly object[]>([]);
+  const [documents, setDocuments] = useState<readonly DocumentInterface[]>([]);
 
   useEffect(() => {
     if (!mounted.current) {
@@ -129,6 +135,7 @@ export const ChatProvider: FC<ChatProviderProps> = ({ children }) => {
       lastPromptGuardResponse,
       aiGuardResponses,
       authzResponses,
+      documents,
       setLoading,
       setSystemPrompt,
       setUserPrompt,
@@ -140,6 +147,7 @@ export const ChatProvider: FC<ChatProviderProps> = ({ children }) => {
       setLastPromptGuardResponse,
       setAiGuardResponses,
       setAuthzResponses,
+      setDocuments,
     }),
     [
       loading,
@@ -153,6 +161,7 @@ export const ChatProvider: FC<ChatProviderProps> = ({ children }) => {
       lastPromptGuardResponse,
       aiGuardResponses,
       authzResponses,
+      documents,
     ],
   );
 

@@ -100,5 +100,10 @@ export async function POST(request: NextRequest) {
   return Response.json({
     reply: llmReply,
     authzResponses,
+    documents: docs.map(({ id, metadata, pageContent }) => ({
+      id,
+      metadata,
+      pageContent,
+    })),
   });
 }
