@@ -51,8 +51,12 @@ const SampleCode: FC = () => {
 };
 
 const ResponsesSidePanel: FC<Props> = ({ onClose }) => {
-  const { lastPromptGuardResponse, aiGuardResponses, authzResponses } =
-    useChatContext();
+  const {
+    lastPromptGuardResponse,
+    aiGuardResponses,
+    authzResponses,
+    documents,
+  } = useChatContext();
 
   return (
     <Stack
@@ -98,6 +102,14 @@ const ResponsesSidePanel: FC<Props> = ({ onClose }) => {
                 data={response}
                 style={reactJsonViewStyles}
               />
+            ))}
+          </Stack>
+        </CollapsablePanel>
+
+        <CollapsablePanel title="Documents">
+          <Stack gap={1} py={1} fontFamily="monospace">
+            {documents.map(({ id, pageContent }) => (
+              <pre key={id}>{pageContent}</pre>
             ))}
           </Stack>
         </CollapsablePanel>

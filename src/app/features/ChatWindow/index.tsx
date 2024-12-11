@@ -50,6 +50,7 @@ const ChatWindow = () => {
     setLastPromptGuardResponse,
     setAiGuardResponses,
     setAuthzResponses,
+    setDocuments,
   } = useChatContext();
   const { authenticated, user } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -152,6 +153,7 @@ const ChatWindow = () => {
       );
       llmResponse = llmResponseStruct.reply;
       setAuthzResponses(llmResponseStruct.authzResponses);
+      setDocuments(llmResponseStruct.documents);
     } catch (_) {
       processingError("LLM call failed, please try again");
       return;

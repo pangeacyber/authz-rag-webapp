@@ -1,3 +1,4 @@
+import type { DocumentInterface } from "@langchain/core/documents";
 import type { AIGuard, AuthZ, PromptGuard } from "pangea-node-sdk";
 
 export interface ResponseObject<M> {
@@ -29,6 +30,7 @@ export const aiProxyRequest = (
 ): Promise<{
   reply: string;
   authzResponses: ResponseObject<AuthZ.CheckResult>[];
+  documents: DocumentInterface[];
 }> => {
   return baseProxyRequest(token, "ai", "", body);
 };
