@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@emotion/css": "11.13.5",
-    "@googleapis/drive": "8.14.0",
+    "@googleapis/drive": "^8.14.0",
     "@googleapis/sheets": "9.3.1",
     "@langchain/cloudflare": "^0.1.0",
     "@langchain/core": "0.3.19",
@@ -36,6 +36,7 @@
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@dotenvx/dotenvx": "1.26.2",
+    "@opennextjs/cloudflare": "^0.2.1",
     "@tsconfig/next": "2.0.3",
     "@types/node": "22.10.1",
     "@types/react": "18.3.12",

@@ -12,6 +12,7 @@ import { GoogleDriveRetriever } from "@/google";
 import { getGoogleDriveCredentials } from "@/utils";
 
 import { validateToken } from "../requests";
+import { Document } from "@langchain/core/documents";
 
 const SYSTEM_PROMPT = ChatPromptTemplate.fromMessages([
   [
@@ -66,22 +67,47 @@ export async function POST(request: NextRequest) {
   const body: RequestBody = await request.json();
 
   const authzResponses: object[] = [];
+  const documents = await loader.invoke("");
 
-  const vectorStore = await MemoryVectorStore.fromDocuments(
-    await loader.invoke(""),
-    new OpenAIEmbeddings(),
-  );
-  const retriever = vectorStore.asRetriever();
-  let docs = await retriever.invoke(body.userPrompt);
+  // send request to CF request with documents in the body
+  let cfResp = await fetch(`http://${process.env.CF_WORKER_URL}/load`, {
+    method: "POST",
+    body: JSON.stringify({ docs: documents }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  }).catch((err) => {
+    console.error(err);
+    return new Response("Error ingesting documents", { status: 500 });
+  });
+
+  // const vectorStore = await MemoryVectorStore.fromDocuments(
+  //   await loader.invoke(""),
+  //   new OpenAIEmbeddings(),
+  // );
+  // const retriever = vectorStore.asRetriever();
+  // let docs = await retriever.invoke(body.userPrompt);
+  cfResp = await fetch(`http://${process.env.CF_WORKER_URL}/get`, {
+    method: "POST",
+    body: JSON.stringify({ userPrompt: body.userPrompt }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  }).catch((err) => {
+    console.error(err);
+    return new Response("Error fetching ingested documents", { status: 500 });
+  });
+
+  let docs = await cfResp.json();
 
   // Filter documents based on user's permissions in AuthZ.
   if (body.authz) {
     docs = await Promise.all(
-      docs.map(async (doc) => {
+      docs.map(async (doc: Document) => {
         const response = await authz.check({
           subject: { type: "user", id: username },
           action: "read",
-          resource: { type: "file", id: doc.id },
+          resource: { type: "file", id: doc.metadata?.id },
           debug: true,
         });
         authzResponses.push({
