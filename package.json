@@ -40,7 +40,7 @@
     "@dotenvx/dotenvx": "1.31.0",
     "@tsconfig/next": "2.0.3",
     "@types/node": "22.10.2",
-    "@types/react": "18.3.16",
+    "@types/react": "18.3.17",
     "@types/react-dom": "18.3.5",
     "tsimp": "2.0.12",
     "typescript": "5.7.2",
